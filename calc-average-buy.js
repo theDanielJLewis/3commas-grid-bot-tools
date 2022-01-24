@@ -42,12 +42,12 @@ inquirer
   });
 
 async function calcAverageBuy(gridBotId) {
-    var gridBotInfo = baseUrl + `/ver1/grid_bots/${gridBotId}`;
+    var gridBotInfoUrl = baseUrl + `/ver1/grid_bots/${gridBotId}`;
     var gridMarketOrdersUrl = baseUrl + `/ver1/grid_bots/${gridBotId}/market_orders`;
 
     try {
-        gotOptions.headers.signature = generateSignature(gridBotInfo);
-        var gridInfo = await got(gridBotInfo, gotOptions);
+        gotOptions.headers.signature = generateSignature(gridBotInfoUrl);
+        var gridInfo = await got(gridBotInfoUrl, gotOptions);
         gotOptions.headers.signature = generateSignature(gridMarketOrdersUrl);
         var gridOrders = await got(gridMarketOrdersUrl, gotOptions);
         
@@ -79,7 +79,7 @@ async function calcAverageBuy(gridBotId) {
         });
         // console.log(orders);
         var totalQty = _.sumBy(orders, 'quantity');
-        var totalCost = _.sumBy(orders, 'total');
+        var totalCost = _.sumBy(orders, 'total') + _.toNumber(gridInfo.current_profit);
         var averageBuy = totalCost / totalQty;
         var result = {
             // name: gridInfo.name,
