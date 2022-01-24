@@ -4,7 +4,7 @@
   "description": "Calculators for 3commas grid bots",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "average": "node calc-average-buy.js --"
   },
   "author": "Daniel J. Lewis",
   "license": "ISC",

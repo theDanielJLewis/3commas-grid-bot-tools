@@ -2,11 +2,10 @@ A simple script for running calculations on 3commas grid bots.
 
 # Installation
 
-Clone the repository, open the folder, then run:
-
-```bash
-npm i
-```
+1. Clone the repository to your system.
+2. Navigate into the project folder
+3. Rename `.env-sample` to `.env` and add your 3commas API key and secret
+4. Run `npm i`.
 
 ## Usage
 

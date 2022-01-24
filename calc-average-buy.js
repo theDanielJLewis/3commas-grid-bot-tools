@@ -10,20 +10,24 @@ const baseUrl = 'https://api.3commas.io/public/api';
 
 var gridBotId = argv.id;
 
-var url = baseUrl + `/ver1/grid_bots/${gridBotId}/market_orders`;
+var gridBotInfo = baseUrl + `/ver1/grid_bots/${gridBotId}`;
+var gridMarketOrdersUrl = baseUrl + `/ver1/grid_bots/${gridBotId}/market_orders`;
 
 var gotOptions = {
     headers: {
-        apikey: process.env.API_KEY,
-        signature: generateSignature(url)
+        apikey: process.env.API_KEY
     },
+    resolveBodyOnly: true,
     responseType: 'json'
 }
 
 try {
-    var {body} = await got(url, gotOptions);
+    gotOptions.headers.signature = generateSignature(gridBotInfo);
+    var gridInfo = await got(gridBotInfo, gotOptions);
+    gotOptions.headers.signature = generateSignature(gridMarketOrdersUrl);
+    var gridOrders = await got(gridMarketOrdersUrl, gotOptions);
     
-    var orders = _.concat(body.grid_lines_orders, body.balancing_orders);
+    var orders = _.concat(gridOrders.grid_lines_orders, gridOrders.balancing_orders);
     _.remove(orders, order => {
         return order.status_string != 'Filled';
     });
@@ -54,6 +58,8 @@ try {
     var totalCost = _.sumBy(orders, 'total');
     var averageBuy = totalCost / totalQty;
     var result = {
+        name: gridInfo.name,
+        pair: gridInfo.pair,
         totalQty,
         totalCost,
         averageBuy
