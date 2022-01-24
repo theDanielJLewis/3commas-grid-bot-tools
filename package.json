@@ -2,9 +2,9 @@
   "name": "3commas-grid-bot-calc",
   "version": "1.0.0",
   "description": "Calculators for 3commas grid bots",
-  "main": "index.js",
+  "main": "calc-average-buy.js",
   "scripts": {
-    "average": "node calc-average-buy.js --"
+    "start": "node calc-average-buy.js"
   },
   "author": "Daniel J. Lewis",
   "license": "ISC",

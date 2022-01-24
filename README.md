@@ -12,7 +12,7 @@ A simple script for running calculations on 3commas grid bots.
 Currently, this only supports a rough average buy calculator for grid bots, allowing you to more easily switch from a grid bot to a smart trade.
 
 ```bash
-node calc-average-buy.js --id {id}
+npm start
 ```
 
-Replace `{id}` with the grid bot ID number from 3commas
+Choose the bot you want to calculate and you'll be given the purchased quantity, total cost, and average buy price.

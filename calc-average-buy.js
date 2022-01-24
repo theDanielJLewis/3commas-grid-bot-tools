@@ -2,7 +2,6 @@ import 'dotenv/config';
 import _ from 'lodash';
 import got from 'got';
 import generateSignature from './generate-signature.js';
-const argv = yargs(hideBin(process.argv)).argv
 import inquirer from 'inquirer'
 
 const baseUrl = 'https://api.3commas.io/public/api';
@@ -27,6 +26,7 @@ inquirer
     { 
         type: 'list',
         name: 'id',
+        message: 'Pick your grid bot:',
         choices: gridBots,
     }
   ])
