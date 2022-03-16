@@ -1,7 +1,5 @@
 import 'dotenv/config';
 import _ from 'lodash';
-// import got from 'got';
-// import generateSignature from './generate-signature.js';
 import inquirer from 'inquirer';
 import { API } from '3commas-typescript';
 import queryString from 'query-string';
@@ -89,14 +87,14 @@ async function calcAverageBuy(gridBotId) {
 			// delete order.order_type;
 		});
 		// console.log(orders);
-		var ownedQuantity = _.sumBy(orders, 'quantity');
+		var purchasedQuantity = _.sumBy(orders, 'quantity');
 		var totalInvestment = _.sumBy(orders, 'total');
 		// var totalInvestment = _.sumBy(orders, 'total') + _.toNumber(gridInfo.current_profit);
-		var averageBuyPrice = totalInvestment / ownedQuantity;
+		var averageBuyPrice = totalInvestment / purchasedQuantity;
 		var result = {
 			// name: gridInfo.name,
 			// pair: gridInfo.pair,
-			ownedQuantity,
+			purchasedQuantity,
 			totalInvestment,
 			averageBuyPrice,
 		};
@@ -129,7 +127,6 @@ async function start() {
 			choices: await getGridBots(options),
 		},
 	]);
-	console.log(gridBot);
 	const results = await calcAverageBuy(gridBot.id);
 	if (results) {
 		console.log(results);
@@ -163,22 +160,42 @@ start();
 
 async function convertToSmartTrade(input) {
 	let gridBot = await getGridBot(input.id);
+	await api.customRequest('POST', 1, `/grid_bots/${input.id}/disable`);
 	gridBot = _.merge(gridBot, input);
-	console.log(gridBot);
-	let result = await api.smartTrade({
+
+	let stResult = await api.smartTrade({
 		account_id: gridBot.account_id,
 		pair: gridBot.pair,
 		skip_enter_step: true,
 		position: {
-			type: 'sell',
+			type: 'buy',
 			order_type: 'limit',
 			units: {
-				value: 1,
+				value: gridBot.purchasedQuantity,
 			},
 			price: {
 				value: gridBot.averageBuyPrice,
 			},
 		},
+		take_profit: {
+			enabled: false,
+		},
+		stop_loss: {
+			enabled: false,
+		},
+		note: `Averaged from ${gridBot.name} (${gridBot.id})`,
 	});
-	console.log(result);
+	console.log(
+		`${gridBot.name} disabled and Smart Trade ${stResult.id} created`
+	);
+	const doAnother = await inquirer.prompt([
+		{
+			type: 'confirm',
+			name: 'answer',
+			message: 'Would you like to check another grid bot?',
+			default: true,
+		},
+	]);
+	if (doAnother === true) start();
+	process.exit();
 }
