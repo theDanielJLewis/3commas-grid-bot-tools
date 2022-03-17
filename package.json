@@ -4,8 +4,9 @@
 	"description": "Calculators for 3commas grid bots",
 	"main": "src/calc-average-buy.ts",
 	"scripts": {
-		"start": "ts-node src/calc-average-buy.ts",
-		"dev": "nodemon -I src/calc-average-buy.ts"
+		"start": "ts-node src/app.ts",
+		"dev": "NODE_ENV=development nodemon -I src/app.ts",
+		"build": "tsc"
 	},
 	"author": "Daniel J. Lewis",
 	"license": "ISC",

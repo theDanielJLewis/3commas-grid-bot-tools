@@ -2,7 +2,8 @@ import _ from 'lodash';
 import inquirer from 'inquirer';
 import queryString from 'query-string';
 import dayjs from 'dayjs';
-import api from './modules/3c-api';
+import api from './3c-api';
+import getGridBot from './getGridBot';
 
 async function getGridBots(options) {
 	options.limit = 100;
@@ -23,10 +24,6 @@ async function getGridBots(options) {
 	} catch (error) {
 		console.error(error);
 	}
-}
-
-function getGridBot(id) {
-	return api.customRequest('GET', 1, `/grid_bots/${id}`);
 }
 
 async function calcAverageBuy(gridBotId) {
@@ -76,8 +73,8 @@ async function calcAverageBuy(gridBotId) {
 		// console.log(orders);
 		var purchasedQuantity = _.sumBy(orders, 'quantity');
 		var totalInvestment = _.sumBy(orders, 'total');
-		// var totalInvestment = _.sumBy(orders, 'total') + _.toNumber(gridInfo.current_profit);
 		var averageBuyPrice = totalInvestment / purchasedQuantity;
+		// var totalInvestment = _.sumBy(orders, 'total') + _.toNumber(gridInfo.current_profit);
 		var result = {
 			// name: gridInfo.name,
 			// pair: gridInfo.pair,
@@ -119,7 +116,7 @@ async function start() {
 		console.log(results);
 
 		// Prompt to conver to Smart Trade
-		const shouldConvertToSmartTrade = await inquirer.prompt([
+		const { answer: shouldConvertToSmartTrade } = await inquirer.prompt([
 			{
 				type: 'confirm',
 				name: 'answer',
@@ -137,20 +134,18 @@ async function start() {
 			},
 		]);
 		if (shouldConvertToSmartTrade)
-			convertToSmartTrade({ id: gridBot.id, ...results });
+			convertToSmartTrade({ id: gridBot.id, type: 'grid', ...results });
 	} else {
 		console.log('No filled orders since updating');
 	}
 }
-
-start();
 
 async function convertToSmartTrade(input) {
 	let gridBot = await getGridBot(input.id);
 	await api.customRequest('POST', 1, `/grid_bots/${input.id}/disable`);
 	gridBot = _.merge(gridBot, input);
 
-	let stResult = await api.smartTrade({
+	let newSmartTrade = await api.smartTrade({
 		account_id: gridBot.account_id,
 		pair: gridBot.pair,
 		skip_enter_step: true,
@@ -173,7 +168,7 @@ async function convertToSmartTrade(input) {
 		note: `Averaged from ${gridBot.name} (${gridBot.id})`,
 	});
 	console.log(
-		`${gridBot.name} disabled and Smart Trade ${stResult.id} created`
+		`${gridBot.name} disabled and Smart Trade ${newSmartTrade.id} created`
 	);
 	const doAnother = await inquirer.prompt([
 		{
@@ -186,3 +181,5 @@ async function convertToSmartTrade(input) {
 	if (doAnother === true) start();
 	process.exit();
 }
+
+export default start;
